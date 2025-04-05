@@ -1,0 +1,343 @@
+{
+  "name": "Post to IG",
+  "nodes": [
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841454949034056",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url"
+              },
+              {
+                "name": "caption"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -140
+      ],
+      "id": "28435bdf-6ebb-4c2c-a84d-de3f3f2f6cfc",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "BHfQum1OauIc3dht",
+          "name": "IG Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        300,
+        80
+      ],
+      "id": "3214e75e-3345-45f6-90b9-ecef99bc01b3",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "cmNF2uHYk8UTVisc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=You are skilled at closely analyzing a single image and crafting a detailed caption based on what you see. Describe the main subject, colors, mood, and any interesting details that stand out. Write a clear, engaging caption that helps viewers understand and appreciate the image without using technical or “artsy” language. Make it relatable and suitable for an Instagram audience, encouraging people to connect with the image and respond in the comments. The caption should be vivid, straightforward, and stand on its own as a description of the image, capturing its essence in a way that feels authentic and inviting. Do not use emojis. Do not add hashtags. Do not add quotes. Use fewer adjectives.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        520,
+        80
+      ],
+      "id": "2a432f99-6e9d-4c06-a6f1-a440fcb992a9",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "9nV4qusubUguJ9LY",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apphCs17oEKxu17dd",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/apphCs17oEKxu17dd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzOeeaIufHGxHV7",
+          "mode": "list",
+          "cachedResultName": "IG Image Post",
+          "cachedResultUrl": "https://airtable.com/apphCs17oEKxu17dd/tblzOeeaIufHGxHV7"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Caption": "={{ $json.content }}",
+            "Name": "={{ $('Google Drive').item.json.name }}",
+            "URL": "={{ $('Google Drive').item.json.webContentLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        740,
+        80
+      ],
+      "id": "ccc2f224-1c17-4759-baaa-642d2801e739",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Fzjzfa5vm3GYM2sq",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841454949034056",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $json.fields.URL }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('OpenAI').item.json.content }}\n\n#ai #automation #aiautomation"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        960,
+        80
+      ],
+      "id": "f16d1008-90c0-4238-a2ef-59064c2a1d80",
+      "name": "Create Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "A23ddLP6LU24YrCO",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841454949034056",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        80
+      ],
+      "id": "8eb7bad4-a3aa-42d1-b159-6d73699592ac",
+      "name": "Post To IG",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "A23ddLP6LU24YrCO",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "minute": 48
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "https://drive.google.com/drive/folders/1mWDb1xaaLfWGNsT80NGA5HetOcSOs9k8",
+          "mode": "url"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        80,
+        80
+      ],
+      "id": "4b0dfcc4-4c3f-4661-8993-bb27caec517a",
+      "name": "Google Drive Trigger1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "cmNF2uHYk8UTVisc",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Create Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Container": {
+      "main": [
+        [
+          {
+            "node": "Post To IG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7c1eaa69-0a84-4dcb-9a09-31e1627e48e4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3044bb6d79741589a20b0a658933e4f0f4bf89cdea37b8129b4de41bb91b4550"
+  },
+  "id": "A7hkCvegcAwmsfRx",
+  "tags": []
+}

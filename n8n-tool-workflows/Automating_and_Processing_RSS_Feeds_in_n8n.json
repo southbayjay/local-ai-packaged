@@ -1,0 +1,579 @@
+{
+  "name": "Automating and Processing RSS Feeds in n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "70c01b95-3bb4-4d5d-9912-3ad38eb3ccd2",
+      "name": "Schedule Trigger, Everyday @ 00:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1720,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "channel_ids[0]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        600
+      ],
+      "id": "6017580d-447f-4852-b691-49d3f1cc0196",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "channel_ids",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        600
+      ],
+      "id": "5c6c9c61-11f6-4c59-a932-307228772629",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['channel_ids[0]'] }}",
+        "options": {
+          "ignoreSSL": true
+        }
+      },
+      "id": "bf8ab800-5f0f-4c1c-9ee3-1e63a99ddcff",
+      "name": "RSS Read9",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -700,
+        360
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "content": "## Setup feeds for processing\n",
+        "height": 297,
+        "width": 814,
+        "color": 7
+      },
+      "id": "ff069666-d02e-463c-a6dd-8fb7a2d6bf67",
+      "name": "Sticky Note29",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1780,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ef2283fc-c497-42ca-9039-5e26839c7a13",
+                    "leftValue": "={{ $json['channel_ids[0]'] }}",
+                    "rightValue": "={{ $('Aggregate').item.json.channel_ids[0]['Feed #1'] }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Feed #1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "201cc548-c1d8-4bdf-9f9c-1e42887aa791",
+                    "leftValue": "={{ $json['channel_ids[0]'] }}",
+                    "rightValue": "={{ $('Aggregate').item.json.channel_ids[0]['Feed #2'] }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Feed #2"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "66138def-26b4-4596-a25b-310a62d0611a",
+                    "leftValue": "={{ $json['channel_ids[0]'] }}",
+                    "rightValue": "={{ $('Aggregate').item.json.channel_ids[0]['Feed #3'] }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Feed #3"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -700,
+        880
+      ],
+      "id": "a8ad6604-7fd6-4ba9-8ae2-92e4dad64313",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "## Loop through all items in RSS Feed\n",
+        "height": 297,
+        "width": 534,
+        "color": 7
+      },
+      "id": "8d52208e-30de-4596-b63f-55de0bfb2710",
+      "name": "Sticky Note26",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -540,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "73fca9a2-6768-47c9-a34d-fea75fb17002",
+      "name": "Loop Over Videos9",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -480,
+        360
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        0
+      ],
+      "id": "122dc689-7506-4e4f-a225-2ba9709054f5",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        360
+      ],
+      "id": "8aee9d47-59e5-4789-9fba-2d629ee631f7",
+      "name": "Your output goes here 👉"
+    },
+    {
+      "parameters": {
+        "content": "## All RSS Feeds bundled together",
+        "height": 297,
+        "width": 234,
+        "color": 7
+      },
+      "id": "0f7af52b-483c-465b-a1c8-04fac4b0c3cd",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# OPTION 1",
+        "height": 400,
+        "width": 820
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -800,
+        180
+      ],
+      "typeVersion": 1,
+      "id": "e2e63a3b-9f3c-409e-8758-e1c3893e272f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['channel_ids[0]'] }}",
+        "options": {
+          "ignoreSSL": true
+        }
+      },
+      "id": "44d0007d-f47c-4e52-a6a5-57b317e1728a",
+      "name": "RSS Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -360,
+        880
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "content": "## Loop through all items in RSS Feed\n",
+        "height": 297,
+        "width": 534,
+        "color": 7
+      },
+      "id": "2326f244-b67c-4242-958a-47b38370f66c",
+      "name": "Sticky Note27",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5459dc26-eb9e-427e-aa7e-2ffc9f8693b2",
+      "name": "Loop Over Videos",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -140,
+        880
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        200,
+        540
+      ],
+      "id": "c9d8dbee-2b1d-4e35-971f-baf7b373c4c0",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        120,
+        880
+      ],
+      "id": "9374cb5e-bdaa-459f-b223-2c6a4ff88a0d",
+      "name": "Your output goes here 👉1"
+    },
+    {
+      "parameters": {
+        "content": "## All RSS Feeds bundled together",
+        "height": 297,
+        "width": 234,
+        "color": 7
+      },
+      "id": "2af2a4b1-6b14-4fd9-b16b-6ee49918516f",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# OPTION 2",
+        "height": 400,
+        "width": 1160,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -800,
+        680
+      ],
+      "typeVersion": 1,
+      "id": "0235dcfb-f9b5-4ae0-9eb9-9b97c960753e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Switch between RSS Feeds",
+        "height": 297,
+        "width": 334,
+        "color": 7
+      },
+      "id": "110da6bc-60ad-4d8b-8903-0eb1b4a43425",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5662daf1-4068-46a6-b6af-c10d50ce612c",
+              "name": "Feed #1",
+              "value": "https://machinelearningmastery.com/feed/",
+              "type": "string"
+            },
+            {
+              "id": "b04f5591-360a-42e2-99f7-4ae4f11eb06d",
+              "name": "Feed #2",
+              "value": "https://aws.amazon.com/blogs/aws/feed/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": false
+        }
+      },
+      "id": "a2149763-8f29-4f96-aab5-f45c6780f081",
+      "name": "Set Feed URLS",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1520,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Automating and Processing RSS Feeds in n8n 🤖💡\n\nIf you’re looking to get your hands dirty with automating and processing RSS feeds, I’ve got you covered! With n8n, you can seamlessly integrate and process multiple RSS feeds for anything from monitoring news sites to managing blogs, podcasts, or product updates. Here's a quick breakdown of how to handle RSS feeds inside your automation workflows. Let’s dive in!\n\n## 1️⃣ Set Up Your Feeds\nTo start, we’ll set up the RSS feed URLs that we want to process. This is done with the **Set** node where you define each feed’s URL. For instance:\n\n- **Feed #1**: `https://machinelearningmastery.com/feed/`\n- **Feed #2**: `https://aws.amazon.com/blogs/aws/feed/`\n\nYou can add as many feeds as you like here—just make sure to update the feed URLs.\n\n## 2️⃣ Triggering the Workflow\nThe **Schedule Trigger** node is perfect for setting up a recurring schedule to fetch RSS data. For example, you can set it to trigger every day at midnight to check for new items in your feeds.\n\n## 3️⃣ Splitting and Aggregating Data\nOnce you’ve set up your feed URLs, you’ll need to aggregate the data. The **Aggregate** node collects all the feed data and prepares it for further processing. Then, use the **Split Out** node to separate the feeds into individual channels (if you're dealing with multiple sources). This way, you can handle each feed separately depending on your logic.\n\n## 4️⃣ Processing RSS Feed Items\nNow, the magic happens! 🎩 The **RSS Feed Read** node is used to pull the content from each feed. Once the feed data is pulled in, you can loop over each item using the **Split In Batches** node. This is helpful when you have multiple entries (like blog posts or podcast episodes) and want to process them individually.\n\n## 5️⃣ Switch Logic for Different Feeds\nThe **Switch** node allows you to route different RSS feeds to specific paths depending on conditions. For example, Feed #1 may be processed differently from Feed #2, based on keywords or content types. You can filter based on conditions, so that each feed gets handled in a unique way.\n\n## 6️⃣ Do Something with the Feed Data\nFinally, once you’ve processed the feed, you can take action! Whether it’s sending notifications, posting to a Slack channel, or saving to a database, you can use the **No Operation** node as a placeholder until you decide what action to perform with the results. Or, send the data to a final output (like a Google Sheet, email, or webhook).\n\n### Example Use Case:\nFor example, let’s say you want to aggregate new blog posts from multiple sites (like the ones mentioned earlier) and send them to a Slack channel. With these nodes, you can:\n\n1. Set the schedule to run daily.\n2. Aggregate the feed data.\n3. Loop over each new item (blog post).\n4. Filter and process each feed differently (depending on the source).\n5. Send each new post to Slack as soon as it's published!\n\n## Why It Works\nBy setting up this automation, you can monitor feeds, process their content, and act on them without manually checking each feed. Whether you’re collecting blog updates, news, or any other RSS content, n8n’s flexibility makes it easy to create tailored workflows. 🌐\n\n## 🔧 Key Nodes to Use:\n- **Set**: Assign feed URLs.\n- **Schedule Trigger**: Set the automation to run at specific times.\n- **Aggregate**: Collect feed data.\n- **Split Out**: Divide the content by channels.\n- **RSS Feed Read**: Pull in the actual feed data.\n- **Switch**: Route data based on conditions.\n- **Split In Batches**: Loop through feed items individually.",
+        "height": 1520,
+        "width": 900,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2780,
+        20
+      ],
+      "typeVersion": 1,
+      "id": "96759c0d-d361-4175-9c97-18e6cd6389a9",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger, Everyday @ 00:00": {
+      "main": [
+        [
+          {
+            "node": "Set Feed URLS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read9": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Videos9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Videos9": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Your output goes here 👉",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Videos": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Your output goes here 👉1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Feed URLS": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [],
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Your output goes here 👉1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1cd2d94c-8651-421f-bf17-10746152b68e",
+  "meta": {
+    "instanceId": "3044bb6d79741589a20b0a658933e4f0f4bf89cdea37b8129b4de41bb91b4550"
+  },
+  "id": "JlZfqOn2zSKLhJnq",
+  "tags": [
+    {
+      "createdAt": "2025-01-01T01:59:45.505Z",
+      "updatedAt": "2025-01-01T01:59:45.505Z",
+      "id": "kqr9sP8fFumxuFsV",
+      "name": "Lets Automate It"
+    },
+    {
+      "createdAt": "2025-01-25T01:00:25.889Z",
+      "updatedAt": "2025-01-25T01:00:25.889Z",
+      "id": "18OcZAHzq4W8IZXo",
+      "name": "Building Blocks"
+    }
+  ]
+}

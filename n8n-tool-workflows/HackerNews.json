@@ -1,0 +1,137 @@
+{
+  "name": "HackerNews",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "69c0f226-5d44-489e-8fb4-aa953536602d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://r.jina.ai/https://feeds.feedburner.com/TheHackersNews",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer jina_2c0b1367aa3e457bb01861e5135c26aceMGSuRDZiqL7OzNjUFjyxCgRbsLA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "cd568c40-c282-42af-acda-757cfb35dedb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "text": "=Please extract and list (with a | between each one) all of the title and URL Source and output in a JSON with these objects\n\n{\n\t\"title\": \"Sample News Title\",\n\t\"URL Source\": \"https://example.com/news-article\"\n}\n\nHere's the text to sort\"\n {{ $json.data }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n\t\"title\": \"Sample News Title\",\n\t\"URL Source\": \"https://example.com/news-article\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "e0ea3346-16f7-414e-bdf2-d01e2a953349",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        240
+      ],
+      "id": "e260071e-d821-42b8-b1a0-aca7439d0f22",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "9nV4qusubUguJ9LY",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bca43eff-5782-4a49-96a2-1e75a8a760cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3044bb6d79741589a20b0a658933e4f0f4bf89cdea37b8129b4de41bb91b4550"
+  },
+  "id": "Oqkn69I3UpEABDtk",
+  "tags": []
+}

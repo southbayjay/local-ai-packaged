@@ -1,0 +1,151 @@
+{
+  "name": "Simple AI Chatbot with n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9e7c9af8-6814-4620-9d87-39c845522b3e",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        380,
+        60
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "t5MoHQt5nn0nWWnw",
+          "name": "OpenAi Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "9e66b67b-37a3-4dc7-992a-7ff76347edcb",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        520,
+        60
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "560d786a-9a0f-44e0-89a7-7028959f3135",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "position": [
+        660,
+        60
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "serpApi": {
+          "id": "JoatqXyWFLi4q58p",
+          "name": "SerpAPI Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ab14d15b-d476-426b-862e-125b928a4bc1",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        100,
+        -160
+      ],
+      "webhookId": "53c136fe-3e77-4709-a143-fe82746dd8b6",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f4bfc17f-d8ee-4e5d-a798-bce77b67e285",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        420,
+        -160
+      ],
+      "typeVersion": 1.6
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0ff2e72e-7afc-403c-90f2-d61ae326dd3c",
+  "meta": {
+    "instanceId": "38d37c49298b42c645e6a7693766d7c3522b24e54454034f955422b5d7af611c"
+  },
+  "id": "VUAvhWqpIDXLHmVa",
+  "tags": [
+    {
+      "createdAt": "2024-10-18T18:45:58.204Z",
+      "updatedAt": "2024-10-18T18:45:58.204Z",
+      "id": "QnPxEzmDTEnFd3nE",
+      "name": "AI Agent"
+    },
+    {
+      "createdAt": "2024-10-01T15:20:49.863Z",
+      "updatedAt": "2024-10-01T15:20:49.863Z",
+      "id": "CDiiXSfzoIflPXMC",
+      "name": "Lets Automate It"
+    }
+  ]
+}

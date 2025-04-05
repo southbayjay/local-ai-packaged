@@ -1,0 +1,463 @@
+{
+  "name": "Post Image IG",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -560,
+        220
+      ],
+      "id": "bd960479-9962-426f-9e8d-04a486e3611a",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I0FvJYGpMUurICYC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=You are skilled at closely analyzing a single image and crafting a detailed caption based on what you see. Describe the main subject, colors, mood, and any interesting details that stand out. Write a clear, engaging caption that helps viewers understand and appreciate the image without using technical or “artsy” language. Make it relatable and suitable for an Instagram audience, encouraging people to connect with the image and respond in the comments. The caption should be vivid, straightforward, and stand on its own as a description of the image, capturing its essence in a way that feels authentic and inviting. Do not use emojis. Do not add hashtags. Do not add quotes. Use fewer adjectives.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -340,
+        220
+      ],
+      "id": "c11b281a-c02d-422a-b85c-f86af78024ff",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "oh1B56WgNxKUxh5n",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apphCs17oEKxu17dd",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/apphCs17oEKxu17dd"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblzOeeaIufHGxHV7",
+          "mode": "list",
+          "cachedResultName": "IG Image Post",
+          "cachedResultUrl": "https://airtable.com/apphCs17oEKxu17dd/tblzOeeaIufHGxHV7"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Caption": "={{ $json.content }}",
+            "Name": "={{ $('Google Drive').item.json.name }}",
+            "URL": "={{ $('Google Drive').item.json.webContentLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -120,
+        220
+      ],
+      "id": "b478f765-891a-426d-ac34-833478e4ad1a",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "vKvAxQ44iUn6JHaI",
+          "name": "Airtable IG Image Post"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841454949034056",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $json.fields.URL }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('OpenAI').item.json.content }}\n\n#ai #automation #aiautomation"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        100,
+        220
+      ],
+      "id": "dba66f38-8e93-4e99-b334-fd660f01ff60",
+      "name": "Create Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "4WsnJFKIBRcvhnSb",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841454949034056",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        220
+      ],
+      "id": "e8c39bee-56b3-424a-818b-af87004b148f",
+      "name": "Post To IG",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "4WsnJFKIBRcvhnSb",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "minute": 48
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "https://drive.google.com/drive/u/0/folders/1mWDb1xaaLfWGNsT80NGA5HetOcSOs9k8",
+          "mode": "url"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        220
+      ],
+      "id": "e9850507-c6a4-403f-bba5-544c019fa0bd",
+      "name": "Google Drive Trigger1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I0FvJYGpMUurICYC",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "OpenAI": [
+      {
+        "json": {
+          "content": "In this image, you see a sleek interface of a video generator tool. The screen is dark, creating a good contrast with the vibrant purple and white text that clearly highlights the key features of the application. The setup suggests a friendly user experience, inviting even beginners to dive into video creation with ease. \n\nThis is a modern tech tool designed for creativity. It feels accessible and encourages users to explore their storytelling potential. Imagine diving into a project where you can transform ideas into cinematic experiences. \n\nWhat kind of videos would you create with this tool? Share your ideas in the comments!"
+        }
+      }
+    ],
+    "Airtable": [
+      {
+        "json": {
+          "id": "rec5RPmRnUZH5xkpx",
+          "createdTime": "2025-03-20T03:39:07.000Z",
+          "fields": {
+            "Name": "wan2.1.png",
+            "Caption": "In this image, you see a sleek interface of a video generator tool. The screen is dark, creating a good contrast with the vibrant purple and white text that clearly highlights the key features of the application. The setup suggests a friendly user experience, inviting even beginners to dive into video creation with ease. \n\nThis is a modern tech tool designed for creativity. It feels accessible and encourages users to explore their storytelling potential. Imagine diving into a project where you can transform ideas into cinematic experiences. \n\nWhat kind of videos would you create with this tool? Share your ideas in the comments!",
+            "URL": "https://drive.google.com/uc?id=1KkIHXuBMdYIe1CVDarAiQOSiKuXTkr-D&export=download"
+          }
+        }
+      }
+    ],
+    "Google Drive Trigger1": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "fileExtension": "png",
+          "copyRequiresWriterPermission": false,
+          "md5Checksum": "1cb1c3dd5f33cffbe4d7f51fe7bb0cbe",
+          "writersCanShare": true,
+          "viewedByMe": true,
+          "mimeType": "image/png",
+          "parents": [
+            "1mWDb1xaaLfWGNsT80NGA5HetOcSOs9k8"
+          ],
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBOF9WQMJYwKXx-nGzWlU9EdonuU5pHMWjM7VMOGozwVNZ5LMKwKsGBi9u6lxeLWT3z56Be5akct2XikAl7CjbHktuGfF97KRkm2_-Rz6cSGpg=s220",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/image/png",
+          "shared": true,
+          "lastModifyingUser": {
+            "displayName": "Southbay Creations",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "05198991821555106455",
+            "emailAddress": "info@southbaycreations.com",
+            "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXCHIMuoWZNgwydoW0tEq_Xb9PEue6W4PRXg7fsqHLMgxToG4cPEqzStu-Ym_Oxz0PejkQCiZCMCzNdi2nXKaSCRKgy5LT9Uh13X6mRUcYosD1TFVuipFbCXWRCbchhG0wLSi6ZKJfAJjGqyAUakz3FfCAnC5TvAMdE9d-XrGbsvyz-T1bcA0-zNaO68cVs2U8Ih-Tq7PPWefVf0TKQYKhOF-BEOElroGK9MzNf5WEZA7O7RQ_9-7H4MUKQ04i2kncwYPK8VD187b5d0hU6IUR_DOvJKQdNQizlk8UqA2sD2QBpJ8MGYsvHWxw5XR80rpZugg_-1GGUoo1vd-LITdQqZzEDtBWz7i7lzG6FMe6ecYVqToYquH_1_MfYvRRqrhPjm3xTanBWhKh6f_oFHB1IZ3wlDUu8WnOG-4Qoa7Zty-mo4gGjJQlTjH-ZWqQrikXq4VRBdC--ybzJodE0OU1cG94RCujPiOsH4jWHYJ-pumkoWiq9Rio1YRTuq_qCcykTw-NwDFyAhSpYc6SZ_SXhPi27HClWiAsBD3mrBSflBJIkm9sQCGypWwBHp6DPtvnGUHe-U88XzkE77srdp2TOqGBUVhRlBZhL3nbRVgwwlyv0sXW7XHG2JvZ4p3Ob85zOs5NhSU29Sqd8Fz6S7HjASJ4BADH9SDy6sQagDi6S77BbdN9cGVWb3oVBQJIkfPENfWE8QNuyfhHZGTGg-6ShrrP5dVhMnm_NK90FymfhDe5LQVoox8jIhkvVEal2nTl1lJJvQafRwGi_DgNtorcL4rmpGJNQIlU6CoHHZwOf0bB4xc8WhcaISJd2ruQAi_gR91-z7O5OxhTBBJpFp4NFzYIDJ6Q-E0CZ3IyPk8H4SL_IUlFsQFsPfNra4Wyq6xmAnIf6CtKGG4gaB--yvLt5b4NEr9jiKVo5e6EZ1bFk2W9lNfBi_DMtEZ0jZ9s9FBMD8WHww5wBMPFNoUc4EyGCdg=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Southbay Creations",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "05198991821555106455",
+              "emailAddress": "info@southbaycreations.com",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXCHIMuoWZNgwydoW0tEq_Xb9PEue6W4PRXg7fsqHLMgxToG4cPEqzStu-Ym_Oxz0PejkQCiZCMCzNdi2nXKaSCRKgy5LT9Uh13X6mRUcYosD1TFVuipFbCXWRCbchhG0wLSi6ZKJfAJjGqyAUakz3FfCAnC5TvAMdE9d-XrGbsvyz-T1bcA0-zNaO68cVs2U8Ih-Tq7PPWefVf0TKQYKhOF-BEOElroGK9MzNf5WEZA7O7RQ_9-7H4MUKQ04i2kncwYPK8VD187b5d0hU6IUR_DOvJKQdNQizlk8UqA2sD2QBpJ8MGYsvHWxw5XR80rpZugg_-1GGUoo1vd-LITdQqZzEDtBWz7i7lzG6FMe6ecYVqToYquH_1_MfYvRRqrhPjm3xTanBWhKh6f_oFHB1IZ3wlDUu8WnOG-4Qoa7Zty-mo4gGjJQlTjH-ZWqQrikXq4VRBdC--ybzJodE0OU1cG94RCujPiOsH4jWHYJ-pumkoWiq9Rio1YRTuq_qCcykTw-NwDFyAhSpYc6SZ_SXhPi27HClWiAsBD3mrBSflBJIkm9sQCGypWwBHp6DPtvnGUHe-U88XzkE77srdp2TOqGBUVhRlBZhL3nbRVgwwlyv0sXW7XHG2JvZ4p3Ob85zOs5NhSU29Sqd8Fz6S7HjASJ4BADH9SDy6sQagDi6S77BbdN9cGVWb3oVBQJIkfPENfWE8QNuyfhHZGTGg-6ShrrP5dVhMnm_NK90FymfhDe5LQVoox8jIhkvVEal2nTl1lJJvQafRwGi_DgNtorcL4rmpGJNQIlU6CoHHZwOf0bB4xc8WhcaISJd2ruQAi_gR91-z7O5OxhTBBJpFp4NFzYIDJ6Q-E0CZ3IyPk8H4SL_IUlFsQFsPfNra4Wyq6xmAnIf6CtKGG4gaB--yvLt5b4NEr9jiKVo5e6EZ1bFk2W9lNfBi_DMtEZ0jZ9s9FBMD8WHww5wBMPFNoUc4EyGCdg=s64"
+            }
+          ],
+          "headRevisionId": "0B5CzJSokgsJjUFJQZzZ6d2xnSWNncXU4SW03YmZaVVg1SGw4PQ",
+          "webViewLink": "https://drive.google.com/file/d/1KkIHXuBMdYIe1CVDarAiQOSiKuXTkr-D/view?usp=drivesdk",
+          "webContentLink": "https://drive.google.com/uc?id=1KkIHXuBMdYIe1CVDarAiQOSiKuXTkr-D&export=download",
+          "size": "246257",
+          "viewersCanCopyContent": true,
+          "permissions": [
+            {
+              "id": "anyoneWithLink",
+              "type": "anyone",
+              "kind": "drive#permission",
+              "role": "reader",
+              "allowFileDiscovery": false
+            },
+            {
+              "id": "05198991821555106455",
+              "displayName": "Southbay Creations",
+              "type": "user",
+              "kind": "drive#permission",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXbnzMzkBWSsbU0RjCF8Xq5ees6hYVUtKiMC3_m5WtlasP5CK5-FuQ2-TyMC8IL6H0iCsjzN-FmjzEY28qJd_oSXKVvCLwd6jvqN1msQYM_I2mqMu9Fd6quX3BvykW1Ldiu_VUPDbVK0ON08eoLaa211m-BHCsIXEqyiwUpm4YUmFF6HTQbqjrQ4msr4qrePdirNCzz9EYqKW-yxLvRSYJGff0eCFcfyQIw4Geb96BPxpmnFHig1gdxf0gAMDgJvMJqhme1WFPsBq-CghmKoO5Q8D1i98uBOfJ_karztTiYA488b_BQZ6hm3JaeYzJCeumcalO0Yetd8nAKwawcHmD0-eV3QWFQ_imqmM2gQ9xPvWpWJC0hMGcd0Mavkf75pzrDAgL87j7N7_BRxKoFWhl9KaPJYChewGjez8NHb-azDG8Fd6WtQEBnR5Unx29UjCKDRhzsINJRHD56NwIrtI2RN6DD-zlEx06GWC1ttiay0Z5GOegNyDIUmviJu9SjrBJl00dFFHK7Wr75E6g2u_0O3k4WeCfN68Ygydk1wvgwcouNEYL7Xc3NNmRulZGpu6NQsnmQ6Rgzjb2Mp81OVjjDgp2JnOr9xrgmceKs3lSSwjw7CvxBadTi1ZbRWeC56C6YspMJfCG5daODdVAJhsBPF5QwpWa0idFx4LnTAC52-FaLzrkBJpERKgh1iSVwUHHJ-ZL8sU0Nr9DQLPfdt__ReQA1dC-ysg4eGqT1VocWzJunF0yUXFhsdO0UccZWSPXB2eTeLtGZHWNcNtuMCibbpk40v64a9gZJIFFR56DAH2GSq5VnkaYGFXLX8akMfq8TDSaPHtG6d7JP4sdVeYphtfRqejMip754hqqAr5xXWyj8a9N_mhoHJnqAty0aboXJyVSVlz8-Dhoki39Va0YxhpRBthoguE8GGY5bnjUC7EUSO6MfoSsOZSehnzqJGU91rQgq4ast5MQ_6WMocaKVFw=s64",
+              "emailAddress": "info@southbaycreations.com",
+              "role": "owner",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "hasThumbnail": true,
+          "spaces": [
+            "drive"
+          ],
+          "id": "1KkIHXuBMdYIe1CVDarAiQOSiKuXTkr-D",
+          "name": "wan2.1.png",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "createdTime": "2025-03-17T22:14:46.607Z",
+          "modifiedTime": "2025-03-17T22:12:52.000Z",
+          "modifiedByMeTime": "2025-03-17T22:12:52.000Z",
+          "viewedByMeTime": "2025-03-17T22:14:46.607Z",
+          "quotaBytesUsed": "246257",
+          "version": "3",
+          "originalFilename": "wan2.1.png",
+          "ownedByMe": true,
+          "fullFileExtension": "png",
+          "isAppAuthorized": false,
+          "capabilities": {
+            "canChangeViewersCanCopyContent": true,
+            "canEdit": true,
+            "canCopy": true,
+            "canComment": true,
+            "canAddChildren": false,
+            "canDelete": true,
+            "canDownload": true,
+            "canListChildren": false,
+            "canRemoveChildren": false,
+            "canRename": true,
+            "canTrash": true,
+            "canReadRevisions": true,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canMoveItemIntoTeamDrive": true,
+            "canUntrash": true,
+            "canModifyContent": true,
+            "canMoveItemOutOfDrive": true,
+            "canAddMyDriveParent": false,
+            "canRemoveMyDriveParent": true,
+            "canMoveItemWithinDrive": true,
+            "canShare": true,
+            "canMoveChildrenWithinDrive": false,
+            "canModifyContentRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canAcceptOwnership": false,
+            "canReadLabels": false,
+            "canModifyLabels": false,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canRemoveContentRestriction": false,
+            "canDisableInheritedPermissions": false,
+            "canEnableInheritedPermissions": true
+          },
+          "thumbnailVersion": "1",
+          "modifiedByMe": true,
+          "permissionIds": [
+            "anyoneWithLink",
+            "05198991821555106455"
+          ],
+          "imageMediaMetadata": {
+            "width": 1152,
+            "height": 1388,
+            "rotation": 0
+          },
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "sha1Checksum": "f48eec19d860041bbe32f46f08440127e8b2dab6",
+          "sha256Checksum": "b1cb329cee92492ecd1b23e404d14fc1b9ef6087b1019b3517ed34cc3dbcc905",
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Create Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Container": {
+      "main": [
+        [
+          {
+            "node": "Post To IG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "56609684-fe15-4664-95c4-76aa9cde4259",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "643001ca220f9251e4660202f34b1140878c5547aee2f09a9fb12c461e82212c"
+  },
+  "id": "Ezw7NrFrZV7d3K0g",
+  "tags": []
+}

@@ -1,0 +1,248 @@
+{
+  "name": "Tech Stack & Prompt",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "X-n8n-Signature",
+                "value": "EvtIS^EBVISeie6svB@6ev"
+              }
+            ]
+          },
+          "responseKey": "={{$json}}"
+        }
+      },
+      "id": "b80bc8dd-8f08-4efe-a6f7-ce674fdbdc01",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee2bcd57-3b4c-43f9-b4b7-3a25687b9a68",
+              "name": "query",
+              "value": "={{ $json.body.query }}",
+              "type": "string"
+            },
+            {
+              "id": "63f23e51-af2b-47c4-a288-5abaf9b6c357",
+              "name": "user_id",
+              "value": "={{ $json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "b97a3670-8a87-481b-8695-db44624be7d8",
+              "name": "request_id",
+              "value": "={{ $json.body.request_id }}",
+              "type": "string"
+            },
+            {
+              "id": "7d3fa06d-08f7-4517-b9c5-3c46ff476f55",
+              "name": "session_id",
+              "value": "={{ $json.body.session_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4ee0d09d-86dc-4d27-8183-3f3ecc20b930",
+      "name": "Prep Input Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "366f970e-5b70-46ac-833e-98b4a35983d1",
+              "name": "Response",
+              "value": "={{$json.output}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a83ed691-2eef-4034-8a74-3b9842005106",
+      "name": "Prep Output Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "claude-3-5-haiku-20241022",
+        "options": {}
+      },
+      "id": "42bd1ba6-730b-464b-ad12-003f0b1def7a",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        220
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "aTRdusQEhPN1cnPx",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('Prep Input Fields').item.json.session_id}}",
+        "tableName": "messages",
+        "contextWindowLength": 10
+      },
+      "id": "2d92a3e4-f5a9-463a-a746-0d647d2468b4",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        540,
+        220
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "7xmbcCufPP1Yr8Iv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tech-stack-expert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "af46a64a-3a3a-42f6-a231-6c4f160516b1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "b64eb7c7-350f-4477-a56b-ffcd9d19dc2f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$('Prep Input Fields').item.json.query}}",
+        "options": {
+          "systemMessage": "=You are a tech stack expert and help users figure out what their tech stack should be for their full stack applications. Your goal is to guide users through a conversation to get the information you need from them to best define the ideal tech stack for their use case.\n\nIMPORTANT: Only ask one question at a time.\n\n1. First ask them to describe the application they are looking to build.\n\n2. Next ask them if they are using AI coding assistants, ask if they are using\n- Bolt.new\n- Bolt.diy\n- Windsurf\n- Lovable\n- Cursor\n- Aider\n- Another AI Coding Assistant\n\nIf they are using Bolt.new, Bolt.diy, or Lovable, assume their frontend needs to be a React frontend with Vite. Otherwise, you aren't sure at this point. You also don't know about the backend yet.\n\n3. Next ask them which technologies they have experience with for the frontend.\n\n4. Next ask them the same thing but for the backend.\n\n5. Next ask them how many users will be using the platform.\n- 1-100\n- 100-1,000\n- 1,000-10,000\n- 10,000+\n\n6. Next ask if there are any technologies they definitely need to use for the frontend, backend, authentication, the LLM, or cloud hosting. Or anything else that is a requirement.\n\nOnce you have all this information, generate them a full tech stack including:\n\n1. Frontend\n\nFor very simple applications with not a lot of users, recommend Streamlit unless they are building with a browser AI coding assistant like Bolt.new, Bolt.diy, or Lovable.\n\nFor more complicated apps or ones with more users, recommend Next.js or React/Svelte/Vue with Vite.\n\n2. Backend\n\nRecommend n8n/Flowise for building AI agents for simple use cases, otherwise recommend LangChain + LangGraph with either Python or JavaScript.\n\nThe backend should be Python or JavaScript mostly, only recommend Go if they need something very fast that doesn't have AI integrated.\n\nFor APIs, recommend FastAPI for Python and Express for JavaScript.\n\n3. Authentication\n\nRecommend Supabase authentication for most use cases unless it seems more complex/multiple parts of the site that could benefit from the robustness and SSO offered by Auth0.\n\n4. Database\n\nRecommend a SQL database for most use cases unless it really makes sense to use Firebase/MongoDB. Supabase is the go to for SQL and also using PGVector for RAG.\n\n5. LLM\n\nRecommend a Claude model (3.5 Sonnet or 3.5 Haiku depending on cost/speed) if there isn't private data. Otherwise, recommend using Ollama for a local model like Qwen 2.5 or Qwen 2.5 Coder 32b. Recommend Llama 3.2 for a vision model.\n\n6. After gathering all the above information, ask the user \"Would you like me to create a detailed LLM prompt to help you get started with building this application?\" Then:\n   - If the user responds \"yes\":\n     - Compile all gathered information about their application requirements, tech preferences, and constraints\n     - Generate a comprehensive prompt that includes:\n       - Project description and purpose\n       - Required technologies and constraints\n       - User scale and performance requirements\n       - Any specific tech stack components they must use\n       - Experience level with different technologies\n       - AI assistant being used (if any)\n     - Format this information into a clear, structured prompt suitable for an LLM to generate the initial application code\n   - If the user responds \"no\":\n     - Respond with \"I understand. Please let me know if you need any other assistance with your tech stack or application planning.\"\n\nThis version provides clearer instructions to the LLM about:\n1. When exactly to ask about prompt generation\n2. What information to include in the prompt\n3. How to structure the response based on the user's answer\n4. The exact follow-up actions for both \"yes\" and \"no\" scenarios\n\nWould you like me to explain any part of this instruction in more detail?\n\nFor all parts above, prioritize recommending what they are comfortable with/tied to unless it really doesn't make sense."
+        }
+      },
+      "id": "72078709-71ff-4b6e-bfa8-7c9b24b0ae33",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        500,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prep Output Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Input Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prep Input Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Prep Output Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5bd09baf-b452-426e-bd06-8f96389bb80d",
+  "meta": {
+    "instanceId": "3044bb6d79741589a20b0a658933e4f0f4bf89cdea37b8129b4de41bb91b4550"
+  },
+  "id": "5V2saRDfFmprxU9w",
+  "tags": []
+}

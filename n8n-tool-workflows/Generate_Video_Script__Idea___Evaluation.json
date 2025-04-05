@@ -1,0 +1,980 @@
+{
+  "name": "🌐 Community Automation → Generate Video Script, Idea & Evaluation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2040,
+        200
+      ],
+      "id": "0069be2e-5908-4ac1-a2bc-00005bfdae3f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15UMjLl9-lyz___Z_MepWcoZpqfHnaxEYMK5Sh2Udb8w",
+          "mode": "list",
+          "cachedResultName": "AI_News_Faceless_I_MAKE_MVPS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15UMjLl9-lyz___Z_MepWcoZpqfHnaxEYMK5Sh2Udb8w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1691219668,
+          "mode": "list",
+          "cachedResultName": "AI Faceless Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15UMjLl9-lyz___Z_MepWcoZpqfHnaxEYMK5Sh2Udb8w/edit#gid=1691219668"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Production",
+              "lookupValue": "For Production"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -600,
+        180
+      ],
+      "id": "6aecae52-5525-4434-9567-61c17cbff6c4",
+      "name": "Read Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "G62pZQANOhZoAYVs",
+          "name": "Google Sheets Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Idea }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You're an advanced prompt-generation AI specializing in crafting highly detailed and and hyper-realistic POV (Point of View) image prompt ideas. \n\n### Task ### \nYour task is to generate concise, action-driven, immersive prompt ideas that follow a sequential narrtive, depicting {{ $json.Scenario }} experience based on a given video topic. \n\nYour outputs never include the double-quotes\nYou also priortize more sensational and unique scenes for that given scenario, instead of common things people do generally. \n\n"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -380,
+        180
+      ],
+      "id": "434c8584-0828-4af5-8c19-f3aa29546b0d",
+      "name": "Generate Titles"
+    },
+    {
+      "parameters": {
+        "options": {
+          "numberOfItems": 2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserItemList",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        340
+      ],
+      "id": "33e370a9-5706-453f-b683-e56a1da22ca6",
+      "name": "Item List Output Parser"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You're an advanced prompt-generation AI specializing in expanding short POV (point-of-view) image prompt ideas into detailed, hyper-realstic prompts optimized for image-generation models like Flux and MidJourney. \n\n### Task ###\n\nYour task is to take a brief input and transform it into a rich, cinematic, immersive prompt that strictly adheres to a first person-person perspective, making the viewer feel as if they are physically presen in the scene. \n\nThis is the short prompt idea you need to expand on: {{ $('Read Sheet').item.json.Idea }}\n\nEvery prompt must use this to describe the environment of the image: {{ $json.response.text }}\n\n###Output### \nKeep prompts under 1000 characters in a single, cinematic sentence with no extra formatting, explanations, or unncessary output."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        80,
+        -40
+      ],
+      "id": "63f5e86d-1f62-4b76-b7d2-fe59bd7e3e00",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "t5MoHQt5nn0nWWnw",
+          "name": "OpenAi Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " https://api.piapi.ai/api/v1/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "=YOUR API"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"model\": \"Qubico/flux1-dev\",\n  \"task_type\": \"txt2img\",\n  \"input\": {\n    \"prompt\": \"{{ $json.message.content }}\",\n    \"width\": 540,\n    \"height\": 960\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        160
+      ],
+      "id": "93cdab43-389f-456f-b910-fc91454f1e17",
+      "name": "Text-to-image"
+    },
+    {
+      "parameters": {
+        "url": "= https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "=YOUR API"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        160
+      ],
+      "id": "73bfca7c-d06c-40a1-b7bc-cfa5fad21b98",
+      "name": "Get-Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " https://api.piapi.ai/api/v1/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "=YOUR API"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n    \"model\": \"kling\",\n    \"task_type\": \"video_generation\",\n    \"input\": {\n        \"prompt\": \"{{ $json.data.input.prompt }}\",\n        \"negative_prompt\": \"\",\n        \"duration\": 5,\n        \"elements\": [\n            {\n                \"image_url\": \"{{ $json.data.output.image_url }}\"\n            }\n        ],\n        \"mode\": \"std\",\n        \"aspect_ratio\": \"16:9\",\n        \"version\": \"1.6\"\n    },\n    \"config\": {\n        \"service_mode\": \"public\",\n        \"webhook_config\": {\n            \"endpoint\": \"\",\n            \"secret\": \"\"\n        }\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        360
+      ],
+      "id": "504b4dff-debf-4981-941c-292f14ebba2e",
+      "name": "Image-to-video"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        180,
+        360
+      ],
+      "id": "fb43b617-a513-4988-a49e-7678c6cfb96d",
+      "name": "Wait for Video Generation",
+      "webhookId": "b9183d25-73fc-41e3-bb6f-0647ec70c896"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        180,
+        160
+      ],
+      "id": "76c8a9bd-70bf-41a2-a33a-98c5b79aa31f",
+      "name": "Wait for Image Gen",
+      "webhookId": "39538d98-8cca-4b82-9f44-b6e2e4da98e7"
+    },
+    {
+      "parameters": {
+        "url": "= https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "=Your API"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        360
+      ],
+      "id": "82265e56-f539-49e3-a3c9-658419e17e3a",
+      "name": "Get-Video"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/sound-generation",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "YOUR API"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"text\": \"no voice {{ $json.data.input.prompt.substring(0, 440) }}\",\n  \"duration_seconds\": 5,\n  \"prompt_influence\": 0.6\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        560
+      ],
+      "id": "3710177b-d778-4397-b228-7e2dbde3bae6",
+      "name": "Text-to-Sound"
+    },
+    {
+      "parameters": {
+        "name": ".mp3",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "14VdaINjcrAPOFaMiXrbHnBx5kpYoyMVL",
+          "mode": "list",
+          "cachedResultName": "AI News Faceless Channel Project ",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/14VdaINjcrAPOFaMiXrbHnBx5kpYoyMVL"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        180,
+        560
+      ],
+      "id": "660c9609-581f-4ebb-b6d8-a974777cea45",
+      "name": "G:Drive Upload MP3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "WhRQZLNyinwtRSW7",
+          "name": "Google Drive Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        360,
+        560
+      ],
+      "id": "f309bcde-eec1-4f71-afb4-882cabe72806",
+      "name": "G:Drive Update Access",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "WhRQZLNyinwtRSW7",
+          "name": "Google Drive Account (darryn@optimus01.co.za)"
+        }
+      },
+      "notes": "Change file share setting to anyone if they have the URL"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 4,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        620,
+        140
+      ],
+      "id": "a73ce7b8-0035-4a4d-a9e2-869437649f77",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    scene_titles: items.map(item => item.json.response_text),\n    video_urls: items.map(item => item.json.data.output.video_url),\n    sound_urls: items.map(item => item.json.webContentLink)\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        160
+      ],
+      "id": "975db864-2a62-43e3-b61d-a98bfdf7d53a",
+      "name": "List Elements"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.creatomate.com/v1/renders",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"template_id\": \"5aafffa3-6adc-4a2f-90dc-c91a80d2136a\",\n  \"modifications\": {\n    \"Audio-1.source\": \"{{ $json.sound_urls[0] }}\",\n    \"Audio-2.source\": \"{{ $json.sound_urls[1] }}\",\n    \"Audio-3.source\": \"{{ $json.sound_urls[2] }}\",\n    \"Audio-4.source\": \"{{ $json.sound_urls[3] }}\",\n    \"Audio-5.source\": \"{{ $json.sound_urls[4] }}\",\n    \n    \"Video-1.source\": \"{{ $json.video_urls[0] }}\",\n    \"Video-2.source\": \"{{ $json.video_urls[1] }}\",\n    \"Video-3.source\": \"{{ $json.video_urls[2] }}\",\n    \"Video-4.source\": \"{{ $json.video_urls[3] }}\",\n    \"Video-5.source\": \"{{ $json.video_urls[4] }}\",\n    \n    \"Text-1.text\": \"{{ $json.scene_titles[0] }}\",\n    \"Text-2.text\": \"{{ $json.scene_titles[1] }}\",\n    \"Text-3.text\": \"{{ $json.scene_titles[2] }}\",\n    \"Text-4.text\": \"{{ $json.scene_titles[3] }}\",\n    \"Text-5.text\": \"{{ $json.scene_titles[4] }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        940,
+        160
+      ],
+      "id": "98ec9dae-e922-4064-a879-b03785abbb20",
+      "name": "Render Video",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "o3-mini",
+          "mode": "list",
+          "cachedResultName": "O3-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=###Role###\nAI-Generated Faceless Social Media Influencer (Extreme Engagement Mode 🔥)\nYou are an AI-powered faceless social media influencer, specializing in creating content about [Product/Service/Item etc]. Your goal is to search the internet for [Product/Service/Item etc] using Tavily, find ONLY official company websites, and craft content that is bold and impossible to ignore.\n\nYour content must make the audience feel something—shock, excitement, fear, or FOMO (fear of missing out). The tone should be [fun, punchy, and dramatic urgent, thrilling] \n\n###Workflow & Execution:###\nFind an [Product/Service/Item etc] Directly from the Company’s Website Using Tavily\n\nUse Tavily Search API to find a real, existing [Product/Service/Item etc] from its official website, product page, or blog.\nIgnore third-party news articles and blogs—ONLY use direct company sources.\nPrioritize [Product/Service/Item etc]\nGenerate a Script that is [Emotional, Interesting, Cool]\n\n###The script MUST follow this exact structure:###\n\n[Hook] – A wild, dramatic, or jaw-dropping statement that demands attention in the first 5 seconds.\n[Body] – A powerful, emotional breakdown of what this [Product/Service/Item etc] does, why it’s shocking, and what’s at stake.\n[CTA] – A clear, explosive call-to-action that forces the audience to engage. PLUS, include a direct link to the official site.\n\n###Your Voice & Tone:###\nPunchy, energetic, and emotional—like a creator on a mission to EXPOSE the [Product/Service/Item etc].\nDitch dry facts—this is about drama, urgency, and making people feel something.\nUse power words like “insane,” “mind-blowing,” “scary,” “game-changing,” “unbelievable,” and “unstoppable.”\nStrict Formatting & Structure for Script Generation\n\n\n####EXAMPLE FORMAT (FOLLOW THIS EXACT STYLE FOR EVERY OUTPUT! 🚨)###\n\n“Example 1”\n“Example 2”\n“See the proof for yourself—check out [Product/Service/Item etc] here: [INSERT OFFICIAL LINK]”\n\n###Execution Steps###\nTavily Search – Find an [Product/Service/Item etc] from an official company website, product page, or blog.\nTopic Selection – Identify an [Product/Service/Item etc] \nScript Generation – Follow the guidelines exactly, producing a hook, body, and CTA formatted like the examples with a direct official source link included.\nPlatform Optimization – Generate scripts for TikTok, Instagram Reels, YouTube Shorts, and LinkedIn.\n\n###Your Goal:###\nYour goal is to make the audience react instantly.\n\nEvery script should feel explosive, emotional, and impossible to scroll past. The content must STOP THE SCROLL, SPARK DEBATE, and MAKE PEOPLE CHOOSE A SIDE.\n\nNow, find an AI product from its official site, make it sound like the biggest game-changer EVER, and generate a script that leaves people SHOOK. \n\nFeedback: {{ $json.feedback || \"No feedback available\" }}\n",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1780,
+        200
+      ],
+      "id": "ae913cbb-d295-4572-ad31-40e057cf85c4",
+      "name": "Generate Ideas",
+      "credentials": {
+        "openAiApi": {
+          "id": "t5MoHQt5nn0nWWnw",
+          "name": "OpenAi Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the internet for viral AI news",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"api_key\": \"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\",\n    \"query\": \"{searchTerm}\",\n    \"search_depth\": \"basic\",\n    \"include_answer\": true,\n    \"topic\": \"news\",\n    \"include_raw_content\": true,\n    \"max_results\": 3\n} ",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "searchTerm",
+              "description": "What the user has requested to search the internet for",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -1620,
+        480
+      ],
+      "id": "2e6691bc-b200-4acb-bb17-561c81769286",
+      "name": "Tavily"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1220,
+        460
+      ],
+      "id": "cd213630-8a95-4f8d-b8e0-1bb4b3bac308",
+      "name": "OpenRouter Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are evaluating a social media script. Analyze and score it based on these explicit criteria and provide feedback:\n\n1. Bold Hook (1-5): Does it open with a strong, provocative, declarative statement?\n2. Relatability (1-5): Does it contain relatable examples that clearly connect to the intended audience?\n3. Conversational Simplicity (1-5): Is the language clear, conversational, jargon-free?\n4. Sustained Engagement (1-5): Does the script maintain interest with provocative claims or relatable examples?\n5. Compelling CTA (1-5): Does the script end with an engaging, actionable call-to-action?\n\nProvide:\n- Overall Percentage Score.\n- Individual category scores with concise feedback.\n- Specific recommendations and examples for any category scoring below 5.\n\nExample: \nOverall Score: 87%\n\n- Bold Hook (4/5): Strong hook, but make it more provocative. Suggested Fix: \"ADD EXAMPLES.\"\n- Relatability: (5/5) Perfect relatable example about \"ADD EXAMPLES.\"\n- Language Simplicity: (4/5) \"ADD EXAMPLES.\"\n- Engagement: (4/5) Add a more dramatic comparison, e.g., \"ADD EXAMPLES.\"\n- CTA: (5/5) Strong and clear. \"ADD EXAMPLES.\"\n\nFeedback:\n- Strengthen the bold hook for better virality.\n- Minor clarity fix for broader relatability.\n\nContent: {{ $json.message.content }}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1400,
+        200
+      ],
+      "id": "aee1506f-ffc3-463b-a9c2-c3ca448a3ac6",
+      "name": "AI Peer Review"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2cb8ba61-d207-480b-80c0-bec822dcb9a8",
+              "leftValue": "={{ $json.overallScore }}",
+              "rightValue": "={{ 91 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -860,
+        200
+      ],
+      "id": "c2172724-2044-49f5-9ace-f73cad422b71",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and extract the overall score as a number\nfor (const item of $input.all()) {\n    // Extract the score using regex\n    const match = item.json.output.match(/\\*\\*Overall Score: (\\d+)%\\*\\*/);\n    const score = match ? parseInt(match[1], 10) : null; // Convert score to a number\n\n    // Remove the score from the original output\n    const feedback = item.json.output.replace(/\\*\\*Overall Score: \\d+%\\*\\*\\s*/, '');\n\n    // Assign separated values\n    item.json.overallScore = score; // Store as a number\n    item.json.feedback = feedback; // Rename cleanedOutput to feedback\n}\n\nreturn $input.all();\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1060,
+        200
+      ],
+      "id": "c58c0e4c-c6ae-41b7-ab56-7afd0121a363",
+      "name": "ScoreFeedback"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "146a1454-a0bd-4f87-aaed-20fa64c9fe4b",
+              "name": "feedback",
+              "value": "={{ $json.feedback }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -860,
+        440
+      ],
+      "id": "c5bf4eaf-4635-4cc6-afd3-6188d00f639d",
+      "name": "Feedback"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "116acf02-ea81-46d5-8984-8c0d5a20bebb",
+              "name": "Peer Reviewed Content",
+              "value": "={{ $('Generate Ideas').item.json.message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -860,
+        40
+      ],
+      "id": "16746b99-f012-49e6-81bf-819b7d4ec1ff",
+      "name": "Passed Peer Review"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -420,
+        380
+      ],
+      "id": "5e5b63ad-48e5-4090-827b-93e0b54cb42b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "t5MoHQt5nn0nWWnw",
+          "name": "OpenAi Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -1440,
+        460
+      ],
+      "id": "be24cd3e-2079-492f-8c2b-dff5e78a9338",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "t5MoHQt5nn0nWWnw",
+          "name": "OpenAi Account (darryn@optimus01.co.za)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Content Ideation & Generation, and Content Evaluation & Iteration\n",
+        "height": 660,
+        "width": 1440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2100,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "4732e32b-a632-4ca7-abac-aca2ee4f0e6e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Multimedia Creation, and Automated Rendering & Output\n",
+        "height": 820,
+        "width": 1780,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -640,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "767f6dc0-d172-44cd-8e65-15cf932dcca4",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheet": {
+      "main": [
+        [
+          {
+            "node": "Generate Titles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item List Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Titles",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Titles": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Text-to-image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text-to-image": {
+      "main": [
+        [
+          {
+            "node": "Wait for Image Gen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get-Image": {
+      "main": [
+        [
+          {
+            "node": "Image-to-video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image-to-video": {
+      "main": [
+        [
+          {
+            "node": "Wait for Video Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Image Gen": {
+      "main": [
+        [
+          {
+            "node": "Get-Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Video Generation": {
+      "main": [
+        [
+          {
+            "node": "Get-Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get-Video": {
+      "main": [
+        [
+          {
+            "node": "Text-to-Sound",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Text-to-Sound": {
+      "main": [
+        [
+          {
+            "node": "G:Drive Upload MP3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "G:Drive Upload MP3": {
+      "main": [
+        [
+          {
+            "node": "G:Drive Update Access",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "G:Drive Update Access": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "List Elements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Elements": {
+      "main": [
+        [
+          {
+            "node": "Render Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Ideas": {
+      "main": [
+        [
+          {
+            "node": "AI Peer Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Ideas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Peer Review": {
+      "main": [
+        [
+          {
+            "node": "ScoreFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Passed Peer Review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ScoreFeedback": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback": {
+      "main": [
+        [
+          {
+            "node": "Generate Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Titles",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Peer Review",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5ff504f3-267d-4aed-ac63-afcdc420a291",
+  "meta": {
+    "instanceId": "38d37c49298b42c645e6a7693766d7c3522b24e54454034f955422b5d7af611c"
+  },
+  "id": "PqELWSco4aPVbrKA",
+  "tags": [
+    {
+      "createdAt": "2024-10-01T15:20:49.863Z",
+      "updatedAt": "2024-10-01T15:20:49.863Z",
+      "id": "CDiiXSfzoIflPXMC",
+      "name": "Lets Automate It"
+    },
+    {
+      "createdAt": "2023-10-14T21:08:01.974Z",
+      "updatedAt": "2023-10-14T21:08:01.974Z",
+      "id": "lX7FzjvNMk6ET8Ka",
+      "name": "AI"
+    }
+  ]
+}

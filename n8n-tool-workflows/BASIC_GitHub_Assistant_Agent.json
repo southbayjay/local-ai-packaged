@@ -1,0 +1,257 @@
+{
+  "name": "BASIC GitHub Assistant Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee2bcd57-3b4c-43f9-b4b7-3a25687b9a68",
+              "name": "query",
+              "value": "={{ $json.body.query }}",
+              "type": "string"
+            },
+            {
+              "id": "63f23e51-af2b-47c4-a288-5abaf9b6c357",
+              "name": "user_id",
+              "value": "={{ $json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "b97a3670-8a87-481b-8695-db44624be7d8",
+              "name": "request_id",
+              "value": "={{ $json.body.request_id }}",
+              "type": "string"
+            },
+            {
+              "id": "7d3fa06d-08f7-4517-b9c5-3c46ff476f55",
+              "name": "session_id",
+              "value": "={{ $json.body.session_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "839b31aa-1643-458b-b947-759faa5904ee",
+      "name": "Prep Input Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        300
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "7c6afd2e-50e3-4f63-837c-ef73b682fa6c",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        820,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseGitHubUrl(githubUrl) {\n    const regex = /github\\.com[:/]([^/]+)\\/([^/]+?)(?:\\.git)?$/;\n    const match = githubUrl.match(regex);\n    \n    if (!match) {\n        return \"Invalid GitHub URL format\";\n    }\n    \n    const [, org, repo] = match;\n    return { org, repo };\n}\n\nreturn parseGitHubUrl($('Execute Workflow Trigger').item()().json.query.repository_url)"
+      },
+      "id": "192e89b8-4559-4557-a94d-d3d6dc64a6d9",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ `https://api.github.com/repos/${$('Code').item.json.org}/${$('Code').item.json.repo}/git/trees/main?recursive=1` }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "ee26695c-f127-4d53-a899-decf92547933",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        600
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "wrnpSpQoDvbuCHNq",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function formatRepoStructure(tree) {    \n    // Build directory structure\n    const excludedPaths = ['.git/', 'node_modules/', '__pycache__/'];\n    \n    const structure = tree\n        .filter(item => !excludedPaths.some(excluded => item.path.includes(excluded)))\n        .map(item => `${item.type === 'tree' ? '📁 ' : '📄 '}${item.path}`);\n    \n    return structure.join('\\n');\n}\n\nreturn {structure: formatRepoStructure($('HTTP Request').all()[0].json.tree)}"
+      },
+      "id": "07e92408-0853-47e5-ac82-0e213012e09e",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "id": "a597ff97-f03a-4213-871d-25f18e354355",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        220
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JFUhvVNFoujOCTYg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a coding expert with access to GitHub to help the user manage their repository and get information from it.\n\nYour only job is to assist with this and you don't answer other questions besides describing what you are able to do.\n\nDon't ask the user before taking an action, just do it.\n\nWhen answering a question about the repo, always start your answer with the full repo URL in brackets and then give your answer on a newline. Like:\n\n[Using https://github.com/[repo URL from the user]]\n\nYour answer here..."
+        }
+      },
+      "id": "98ab9d62-0a22-4351-8190-0db56a0d958d",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "f792b07c-a0eb-4370-b965-c1fd9483ef95",
+      "name": "When chat message received",
+      "webhookId": "d511fb81-1419-48b3-a8a2-b37eee045423"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1540,
+        220
+      ],
+      "id": "26b641da-8d40-44c1-8699-5e59de9cf32a",
+      "name": "Window Buffer Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prep Input Fields": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ab762136-9212-433e-b1ef-1963d889ded7",
+  "meta": {
+    "instanceId": "3044bb6d79741589a20b0a658933e4f0f4bf89cdea37b8129b4de41bb91b4550"
+  },
+  "id": "s40Lvm4ZnZJbCZSh",
+  "tags": []
+}

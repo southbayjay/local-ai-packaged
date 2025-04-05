@@ -1,0 +1,616 @@
+{
+  "name": "GitHub Assistant Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "X-n8n-Signature",
+                "value": "EvtIS^EBVISeie6svB@6ev"
+              }
+            ]
+          }
+        }
+      },
+      "id": "79aa72f5-5a34-453d-8548-3d61662f064f",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        0
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee2bcd57-3b4c-43f9-b4b7-3a25687b9a68",
+              "name": "query",
+              "value": "={{ $json.body.query }}",
+              "type": "string"
+            },
+            {
+              "id": "63f23e51-af2b-47c4-a288-5abaf9b6c357",
+              "name": "user_id",
+              "value": "={{ $json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "b97a3670-8a87-481b-8695-db44624be7d8",
+              "name": "request_id",
+              "value": "={{ $json.body.request_id }}",
+              "type": "string"
+            },
+            {
+              "id": "7d3fa06d-08f7-4517-b9c5-3c46ff476f55",
+              "name": "session_id",
+              "value": "={{ $json.body.session_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "26c96737-8af9-42c9-bd81-60b0e55708ec",
+      "name": "Prep Input Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b5eaa2a2-a6bc-40ab-af5e-baa8a5dda1a7",
+              "name": "success",
+              "value": "=true",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53dd407b-6723-49ac-9152-62d1b895f605",
+      "name": "Prep Output Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        0
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "c49382c0-d8e8-4178-b849-2c824ce8b920",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        820,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseGitHubUrl(githubUrl) {\n    const regex = /github\\.com[:/]([^/]+)\\/([^/]+?)(?:\\.git)?$/;\n    const match = githubUrl.match(regex);\n    \n    if (!match) {\n        return \"Invalid GitHub URL format\";\n    }\n    \n    const [, org, repo] = match;\n    return { org, repo };\n}\n\nreturn parseGitHubUrl($('Execute Workflow Trigger').item().json.query.repository_url)"
+      },
+      "id": "43586740-1292-4e0a-aaac-7fce80ac65e4",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ `https://api.github.com/repos/${$('Code').item.json.org}/${$('Code').item.json.repo}/git/trees/main?recursive=1` }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "06de21ed-dd4d-49dc-8fba-1ac0460a57d5",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1860,
+        520
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "wrnpSpQoDvbuCHNq",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function formatRepoStructure(tree) {    \n    // Build directory structure\n    const excludedPaths = ['.git/', 'node_modules/', '__pycache__/'];\n    \n    const structure = tree\n        .filter(item => !excludedPaths.some(excluded => item.path.includes(excluded)))\n        .map(item => `${item.type === 'tree' ? '📁 ' : '📄 '}${item.path}`);\n    \n    return structure.join('\\n');\n}\n\nreturn {structure: formatRepoStructure($('HTTP Request').all()[0].json.tree)}"
+      },
+      "id": "276ee8f8-0b46-46e3-9b49-dc9fa73c439b",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2100,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.action }}",
+                    "rightValue": "get_repo_structure",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d2a78a7b-4708-4efd-a219-ed609b37a399",
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.action }}",
+                    "rightValue": "get_file_content",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a608b23-c3f4-4561-89ba-c8a17efcd2b5",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1320,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ `https://raw.githubusercontent.com/${$('Code').item.json.org}/${$('Code').item.json.repo}/main/${$('Execute Workflow Trigger').item.json.query.file_path}` }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "cfd71891-c2ca-41bb-aa05-b0aa2aaa6cb7",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1860,
+        780
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "wrnpSpQoDvbuCHNq",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "get_file_content",
+        "description": "Use this tool to get the contents of a file in the GitHub repository once you know the path to the file. This is the tool to use to search around in files to get the answer for the user.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id"
+        },
+        "responsePropertyName": "data",
+        "fields": {
+          "values": [
+            {
+              "name": "session_id",
+              "stringValue": "={{ $json.session_id }}"
+            },
+            {
+              "name": "action",
+              "stringValue": "get_file_content"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n\t\"repository_url\": \"The URL to the GitHub repository\",\n    \"file_path\": \"The path to the file in the repository (README.md, public/icon.svg, etc.)\"\n}"
+      },
+      "id": "13c1d9a9-60c7-4a0d-97f5-3f432006b865",
+      "name": "Call Get Repo File Content Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1900,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "name": "get_repo_structure",
+        "description": "Use this tool to get the full structure of a GitHub repository so you know how to navigate it and get contents of specific files in the repo.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id"
+        },
+        "responsePropertyName": "structure",
+        "fields": {
+          "values": [
+            {
+              "name": "session_id",
+              "stringValue": "={{ $json.session_id }}"
+            },
+            {
+              "name": "action",
+              "stringValue": "get_repo_structure"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n\t\"repository_url\": \"The URL to the GitHub repository\"\n}"
+      },
+      "id": "b4af7f62-3bef-4427-a1c9-f771bd501d63",
+      "name": "Call Get Repo Structure Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "messages",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "session_id",
+              "fieldValue": "={{ $('Execute Workflow Trigger').item.json.session_id }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ {\n\"type\": \"ai\",\n\"content\": \"-> Getting file structure of repository...\",\n\"data\": $json.data,\n\"additional_kwargs\": {},\n\"response_metadata\": {}\n} }}"
+            }
+          ]
+        }
+      },
+      "id": "db0fde7c-5782-4c05-ae91-9a02bd027712",
+      "name": "Add AI Message to DB",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        520
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "i933NVupIz97xdnf",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "messages",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "session_id",
+              "fieldValue": "={{ $('Execute Workflow Trigger').item.json.session_id }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ {\n\"type\": \"ai\",\n\"content\": `-> Getting contents of: ${$('Execute Workflow Trigger').item.json.query.file_path}`,\n\"data\": $json.data,\n\"additional_kwargs\": {},\n\"response_metadata\": {}\n} }}"
+            }
+          ]
+        }
+      },
+      "id": "a178cca9-7505-4a96-8747-650c779cb7e8",
+      "name": "Add AI Message to DB1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        780
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "i933NVupIz97xdnf",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "id": "68df3df3-0757-4cd2-ab4e-edbaf4a7375d",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        220
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JFUhvVNFoujOCTYg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$('Prep Input Fields').item.json.query}}",
+        "options": {
+          "systemMessage": "=You are a coding expert with access to GitHub to help the user manage their repository and get information from it.\n\nYour only job is to assist with this and you don't answer other questions besides describing what you are able to do.\n\nDon't ask the user before taking an action, just do it.\n\nWhen answering a question about the repo, always start your answer with the full repo URL in brackets and then give your answer on a newline. Like:\n\n[Using https://github.com/[repo URL from the user]]\n\nYour answer here..."
+        }
+      },
+      "id": "ce2be631-4764-455c-9ba5-154b4515e207",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoke-github-assistant",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bb443ad7-f6a4-4214-b419-f399aff628f1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        920,
+        0
+      ],
+      "webhookId": "e470c2d1-e16e-4c21-9b06-8093d4d76056"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('Prep Input Fields').item.json.session_id}}",
+        "tableName": "system_message",
+        "contextWindowLength": 1
+      },
+      "id": "27100d4d-67a2-4aa9-ba55-c2114e3822c8",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1520,
+        220
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "Y2CDdBMeXdqb4G3l",
+          "name": "Postgres Local"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prep Output Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Input Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Add AI Message to DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add AI Message to DB1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Get Repo Structure Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Get Repo File Content Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add AI Message to DB": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add AI Message to DB1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Prep Output Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prep Input Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e2b33c05-9599-4ea9-8bed-e4e3f9525ad2",
+  "meta": {
+    "instanceId": "3044bb6d79741589a20b0a658933e4f0f4bf89cdea37b8129b4de41bb91b4550"
+  },
+  "id": "PfWmKUE3LWmlx32F",
+  "tags": []
+}

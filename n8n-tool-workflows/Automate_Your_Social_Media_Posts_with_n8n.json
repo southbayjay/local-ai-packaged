@@ -1,0 +1,949 @@
+{
+  "name": "n8n Automations ⚙️ > 📲 Social Media > Automate Your Social Media Posts with n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "html": "={{ $json.data }}"
+      },
+      "id": "a0e143c0-938c-418b-a73c-ea5eeffb89ff",
+      "name": "WebpageContentExtractor",
+      "type": "n8n-nodes-webpage-content-extractor.WebpageContentExtractor",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        1640
+      ]
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v17.0",
+        "node": "17841467060609622",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $('OpenAI').item.json.url.replace(/\\/$/, '') }}\n"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('Create IG post').item.json[\"output\"] }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "37431b7e-4182-44b0-8404-191cca934e63",
+      "name": "Create IG container",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2980,
+        2620
+      ]
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v17.0",
+        "node": "17841467060609622",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $('Create IG container').item.json[\"id\"] }}"
+              },
+              {
+                "name": "Image_url",
+                "value": "={{ $('OpenAI').item.json.url.replace(/\\/$/, '') }}\n"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('Create IG post').item.json[\"output\"] }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "5a83704c-158e-406c-b210-b4acbb6b6785",
+      "name": "Post to IG",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        2620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Get article\n\nThis flow gets a RSS feed from RSS.app that is curated to look for a specific topic.\n\nrss.app is a paid service but it could be replaced by a direct rss feed",
+        "height": 475.18569463548823,
+        "width": 247.05639614855568
+      },
+      "id": "3c62d19c-5256-4599-8f98-7c3f5f31604f",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        1400
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Scrapes the article\n",
+        "height": 262.08889133425004,
+        "width": 170.63280330123808,
+        "color": 5
+      },
+      "id": "b412e4ba-8512-43ee-8d1a-1658395e331f",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        1540
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Gets the plain text\nThis a is community node that needs to be loaded from the n8n community. It parses just the plain text of the scraped blog",
+        "height": 390,
+        "color": 3
+      },
+      "id": "ac79f4b3-6a93-480b-bb18-ad28a5c3f88a",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        1460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Summarise article\nusing an pre configured summariser agent",
+        "height": 200.46419807427793,
+        "width": 378.734393397524,
+        "color": 5
+      },
+      "id": "b3e81fb1-635d-4a39-af22-9d946b5ce88f",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        1380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Image creation\nThese nodes create an image ",
+        "height": 259,
+        "width": 530
+      },
+      "id": "d41a76b6-f2ac-44ab-b498-5d542bc49f33",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        1680
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Create Image for LI\nLI node requires the image to a binary file which can only work if the image is created by the node preceding the LI node, so the image needs to be created a second time\n",
+        "height": 402,
+        "width": 242,
+        "color": 3
+      },
+      "id": "b522ff05-51ef-425d-95e3-cc3aae854667",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        2040
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Post IG\nThese FB nodes actually post to IG as the IG uses the same API as FB",
+        "height": 262.12392847317756,
+        "width": 450.02845667125166,
+        "color": 6
+      },
+      "id": "392a1038-85d3-43c7-a034-51cce3a300b6",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2900,
+        2520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_tV0oFNtQ37X9Cnw82Cny0wdp",
+          "mode": "list",
+          "cachedResultName": "Viral Hook generator"
+        },
+        "prompt": "define",
+        "text": "=Article:  {{ $('WebpageContentExtractor').item.json.textContent }}\nSummary:  {{ $('Article Summary').item.json[\"output\"]  }}\nAdditional Research:  {{ $('Ask Perplexity').item.json.choices[0].message.content }}",
+        "options": {}
+      },
+      "id": "6f7b5be9-bde2-4de3-850e-a2233179e5f0",
+      "name": "Create a viral hook",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        3320,
+        3560
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_aui0jJ1A4xuzwiCJug1EH2qB",
+          "mode": "list",
+          "cachedResultName": "Viral Script generator"
+        },
+        "prompt": "define",
+        "text": "=Article:  {{ $('WebpageContentExtractor').item.json.textContent }}\nSummary:  {{ $('Article Summary').item.json[\"output\"]  }}\nAdditional Research:  {{ $('Ask Perplexity').item.json.choices[0].message.content }}",
+        "options": {}
+      },
+      "id": "60e77e72-8a29-4d8d-a62f-6288d40c2d08",
+      "name": "Create a viral Script",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        3700,
+        3560
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "options": {
+          "responseData": "Got it! Thanks"
+        }
+      },
+      "id": "5c312d72-48ab-485c-9dc6-86a30198bf74",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        2280
+      ],
+      "webhookId": "542dff87-64e0-40cc-ba0c-16af88e950f6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "a21ca52f-1379-47fe-86ac-506d2c4475d4",
+              "leftValue": "={{ $json.query.answer }}",
+              "rightValue": "go",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bd06dc8e-5be6-4766-b108-5c39dae781db",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "update",
+        "workspaceId": "w0lsuyam",
+        "projectId": "pn9no61pcnvfawb",
+        "table": "mtg0el2m2w7022o",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "Status",
+              "fieldValue": "Approved"
+            },
+            {
+              "fieldName": "=Id",
+              "fieldValue": "={{ $('NocoDB').item.json.Id }}"
+            }
+          ]
+        }
+      },
+      "id": "3fd3358e-9c93-4d20-8e7b-4d9d25256fdf",
+      "name": "NocoDB1",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        2260,
+        2200
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "update",
+        "workspaceId": "w0lsuyam",
+        "projectId": "pn9no61pcnvfawb",
+        "table": "mtg0el2m2w7022o",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "Status",
+              "fieldValue": "Declined"
+            },
+            {
+              "fieldName": "Id",
+              "fieldValue": "={{ $('NocoDB').item.json.Id }}"
+            }
+          ]
+        }
+      },
+      "id": "e20e2e6e-71db-4b6f-82a2-4f7ce8d819cd",
+      "name": "NocoDB2",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        2260,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "person": "MRy2s7voQW",
+        "text": "={{ $('Create LinkedIn Post').item.json.output }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {}
+      },
+      "id": "eb8cd4c9-347a-4969-992d-38daf99e2fb4",
+      "name": "LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        3180,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v17.0",
+        "node": "me",
+        "edge": "photos",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $('Create Facebook post').item.json.output }}"
+              },
+              {
+                "name": "url",
+                "value": "={{ $('OpenAI').item.json.url }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "4b739ac3-0901-4b7c-b719-9741d47deaac",
+      "name": "Post to FB",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2680,
+        2100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Send approval\n**This part of the flow creates the FB post, posts to noCodeDB repository, then sends you a message via telegram or you to approve. It waits for your approval and if it gets it update the status in NocodeDB and posts and starts the posting portion of the flow",
+        "height": 317,
+        "width": 1085,
+        "color": 3
+      },
+      "id": "da42326c-18a8-4217-9a46-3a0afaa6267e",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        2140
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_Q31CEHbb8hEASWXwneOhKXvJ",
+          "mode": "list",
+          "cachedResultName": "Twitter post generator"
+        },
+        "prompt": "define",
+        "text": "=Article:  {{ $('WebpageContentExtractor').item.json.textContent }}\nSummary:  {{ $('Article Summary').item.json[\"output\"]  }}\nAdditional Research:  {{ $('Ask Perplexity').item.json.choices[0].message.content }}",
+        "options": {}
+      },
+      "id": "0ca2b46a-9341-403d-8949-9277261d2c70",
+      "name": "Create a tweet",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        3320,
+        3800
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "workspaceId": "w0lsuyam",
+        "projectId": "pn9no61pcnvfawb",
+        "table": "mtg0el2m2w7022o",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "URL",
+              "fieldValue": "={{ $('RSS Feed Trigger').item.json.link }} "
+            },
+            {
+              "fieldName": "Article Summary",
+              "fieldValue": "={{ $('Article Summary').item.json[\"output\"] }}"
+            },
+            {
+              "fieldName": "Platform",
+              "fieldValue": "Facebook"
+            },
+            {
+              "fieldName": "Post",
+              "fieldValue": "={{ $json.output }}"
+            },
+            {
+              "fieldName": "Image",
+              "fieldValue": "={{ $('OpenAI').item.json.url }}"
+            },
+            {
+              "fieldName": "Image Prompt",
+              "fieldValue": "={{ $('Create Image prompt').item.json.output }}"
+            },
+            {
+              "fieldName": "Image URL",
+              "fieldValue": "={{ $('OpenAI').item.json.url }}"
+            }
+          ]
+        }
+      },
+      "id": "1a6b76d7-4adc-4f88-ab33-be28fd5dcb27",
+      "name": "NocoDB",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        1440,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "1011924784",
+        "text": "=FB Post: {{ $('Create Facebook post').item.json.output }}\n\nArticle Summary: {{ $json['Article Summary'] }}\n\nOriginal URL:  {{ $json.URL }}\n\nImage: {{ $('OpenAI').item.json.url }}\n\nNocode DB link that can be used to edit the post: https://app.nocodb.com/#/w0lsuyam/pn9no61pcnvfawb/mtg0el2m2w7022o/Table-1?rowId={{ $json.Id }}\n\nPlease tap [Go]({{ $execution.resumeUrl }}?answer=go) or [No]({{ $execution.resumeUrl }}?answer=no).",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "963ed1c3-88e6-4936-a068-da06c67f2722",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1640,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "hour": 11
+            }
+          ]
+        },
+        "feedUrl": "https://www.artificial-intelligence.blog/ai-news?format=rss"
+      },
+      "id": "68be4845-d9ae-4446-9792-ba7174d6355a",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        1660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "b0ad5052-4eae-447a-acbb-0802d4af8c24",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ new Date().toISOString().split('T')[0] }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0a05cec1-f39d-48cb-993c-3701d1ba3c41",
+      "name": "published in the past 24hrs",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_JEmYZHfGC8auBsCjKlHyDHPD",
+          "mode": "list",
+          "cachedResultName": "Article Summariser"
+        },
+        "prompt": "define",
+        "text": "=Full article: {{ $json.textContent }}",
+        "options": {}
+      },
+      "id": "a6d01a31-b2a5-469b-a808-341ddb472cc7",
+      "name": "Article Summary",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2280,
+        1460
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_2DhNno1r5KBpz6bQ4CA6hafZ",
+          "mode": "list",
+          "cachedResultName": "Create Image Prompt"
+        },
+        "prompt": "define",
+        "text": "=Full article: {{ $('WebpageContentExtractor').first().json.textContent }}  Article Summary:{{ $json.output }} ",
+        "options": {}
+      },
+      "id": "c7dabbad-a122-4d53-a09a-984eb2752a26",
+      "name": "Create Image prompt",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2280,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $('Create Image prompt').item.json[\"output\"] }}",
+        "options": {
+          "returnImageUrls": true
+        }
+      },
+      "id": "845d32c6-9edf-4d84-b9ac-7fe93a9e1103",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2620,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_3Y7NiyLvWCvHYheWyTcyqlMc",
+          "mode": "list",
+          "cachedResultName": "Facebook post generator"
+        },
+        "prompt": "define",
+        "text": "=Article:  {{ $('WebpageContentExtractor').item.json.textContent }}\nSummary: {{ $('Article Summary').item.json[\"output\"] }}",
+        "options": {}
+      },
+      "id": "27ed5a57-de11-42d7-8cfe-816074bae030",
+      "name": "Create Facebook post",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        1080,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_Zl1ENCjz1Yi5fOueuu78CWW7",
+          "mode": "list",
+          "cachedResultName": "Linkedin post generator"
+        },
+        "prompt": "define",
+        "text": "=Article:  {{ $('WebpageContentExtractor').item.json.textContent }}\nSummary:  {{ $('Article Summary').item.json[\"output\"]  }}",
+        "options": {}
+      },
+      "id": "9d1fce27-471f-441d-b14c-ea71f3626874",
+      "name": "Create LinkedIn Post",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2580,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $('Create Image prompt').item.json[\"output\"] }}",
+        "options": {}
+      },
+      "id": "a8d46b0b-d29d-4760-8017-aac18fdd266e",
+      "name": "OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2960,
+        2280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_FUvV8fw57ZZpgdOGzkvrBsCU",
+          "mode": "list",
+          "cachedResultName": "Instagram post generator"
+        },
+        "prompt": "define",
+        "text": "=Article:  {{ $('WebpageContentExtractor').item.json.textContent }}\nSummary:  {{ $('Article Summary').item.json[\"output\"] }}",
+        "options": {}
+      },
+      "id": "8b50b499-ec61-479f-bec0-a9e869820c89",
+      "name": "Create IG post",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        2600,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "9e861313-f7f8-482d-81d0-296c1f0637f3",
+      "name": "Scrapes Article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        1640
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WebpageContentExtractor": {
+      "main": [
+        [
+          {
+            "node": "Article Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create IG container": {
+      "main": [
+        [
+          {
+            "node": "Post to IG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a viral hook": {
+      "main": [
+        [
+          {
+            "node": "Create a viral Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "NocoDB1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NocoDB2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB1": {
+      "main": [
+        [
+          {
+            "node": "Post to FB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create LinkedIn Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create IG post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "published in the past 24hrs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "published in the past 24hrs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Scrapes Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article Summary": {
+      "main": [
+        [
+          {
+            "node": "Create Image prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image prompt": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Create Facebook post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Facebook post": {
+      "main": [
+        [
+          {
+            "node": "NocoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create IG post": {
+      "main": [
+        [
+          {
+            "node": "Create IG container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrapes Article": {
+      "main": [
+        [
+          {
+            "node": "WebpageContentExtractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "20972a7d-3dc2-4a5f-a7a6-cee349fda593",
+  "meta": {
+    "templateId": "2322",
+    "instanceId": "38d37c49298b42c645e6a7693766d7c3522b24e54454034f955422b5d7af611c"
+  },
+  "id": "G9KZa31crHW3H1Wk",
+  "tags": [
+    {
+      "createdAt": "2024-10-01T15:20:49.863Z",
+      "updatedAt": "2024-10-01T15:20:49.863Z",
+      "id": "CDiiXSfzoIflPXMC",
+      "name": "Lets Automate It"
+    }
+  ]
+}
